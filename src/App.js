@@ -1,110 +1,59 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import './index.css';
 
-const fakeAuth = {
-  isAuthenticated: false,
-  authenticate(callback) {
-    this.isAuthenticated = true;
-    setTimeout(callback, 100); // Simulate an asynchronous request
-  },
-  signout(callback) {
-    this.isAuthenticated = false;
-    setTimeout(callback, 100);
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Perform validation or authentication logic here
+    // For simplicity, we'll just check if the username and password are not empty
+    if (username && password) {
+      setIsLoggedIn(true);
+    }
   }
-};
 
-function Home() {
-  return <h2>Welcome to the app!</h2>;
-}
-
-function Dashboard() {
-  return <h2>Dashboard</h2>;
-}
-
-function Login() {
-  const [redirectToReferrer, setRedirectToReferrer] = useState(false);
-
-  const login = () => {
-    fakeAuth.authenticate(() => {
-      setRedirectToReferrer(true);
-    });
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername('');
+    setPassword('');
   };
 
-  if (redirectToReferrer) {
-    // eslint-disable-next-line react/jsx-no-undef
-    return <Navigate to="/dashboard" />;
-  }
-
   return (
-    <div>
-      <h2>Login</h2>
-      <button onClick={login}>Log in</button>
+    <div className="container">
+      {isLoggedIn ? (
+        <div className="welcome">
+          <h1>Welcome, {username}!</h1>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      ) : (
+        <div className="form">
+          <input
+            className="input-field"
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <br />
+          <input
+            className="input-field"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <br />
+          <button className="login-button" onClick={handleLogin}>
+            Login
+          </button>
+        </div>
+      )}
     </div>
   );
-}
-
-function PrivateRoute({ children }) {
-  const isAuthenticated = fakeAuth.isAuthenticated;
-
-  return (
-    <Route
-      render={({ location }) =>
-        isAuthenticated === true ? (
-          children
-        ) : (
-          // eslint-disable-next-line react/jsx-no-undef
-          <Navigate
-            to="/login"
-            state={{ from: location }}
-          />
-        )
-      }
-    />
-  );
-}
-
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const logout = () => {
-    fakeAuth.signout(() => {
-      setIsAuthenticated(false);
-    });
-  };
-
-  return (
-    <Router>
-      <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            {isAuthenticated ? (
-              <li>
-                <Link to="/dashboard">Dashboard</Link>
-              </li>
-            ) : null}
-            <li>
-              {isAuthenticated ? (
-                <button onClick={logout}>Logout</button>
-              ) : (
-                <Link to="/login">Login</Link>
-              )}
-            </li>
-          </ul>
-        </nav>
-
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <Route path="/login" component={Login} />
-          <PrivateRoute path="/dashboard">
-            <Dashboard />
-          </PrivateRoute>
-        </Switch>
-      </div>
-    </Router>
-  );
-}
+};
 
 export default App;
